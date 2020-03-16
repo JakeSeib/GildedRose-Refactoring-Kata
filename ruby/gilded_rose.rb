@@ -15,18 +15,17 @@ class GildedRose
 
       if GildedRose.special_item?(item)
         # special items
-        item.quality += 1
+
         if item.name == "Backstage passes to a TAFKAL80ETC concert"
+          item.quality += 1
           item.quality += 1 if item.sell_in < 11
           item.quality += 1 if item.sell_in < 6
-        end
-        item.sell_in -= 1
-        if item.sell_in < 0
-          if item.name == "Backstage passes to a TAFKAL80ETC concert"
-            item.quality = 0
-          else
-            item.quality += 1
-          end
+          item.sell_in -= 1
+          item.quality = 0 if item.sell_in < 0
+        else
+          item.quality += 1
+          item.sell_in -= 1
+          item.quality += 1 if item.sell_in < 0
         end
         item.quality = 50 if item.quality > 50
 
