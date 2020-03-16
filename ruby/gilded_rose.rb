@@ -9,6 +9,11 @@ class GildedRose
     special_items.include? item.name
   end
 
+  def self.validate_quality(item)
+    item.quality = 50 if item.quality > 50
+    item.quality = 0 if item.quality < 0
+  end
+
   def update_quality()
     @items.each do |item|
       break if item.name == "Sulfuras, Hand of Ragnaros"
@@ -27,15 +32,14 @@ class GildedRose
           item.sell_in -= 1
           item.quality += 1 if item.sell_in < 0
         end
-        item.quality = 50 if item.quality > 50
 
       else
         # normal items
         item.quality -= 1
         item.sell_in -= 1
         item.quality -= 1 if item.sell_in < 0
-        item.quality = 0 if item.quality < 0
       end
+      GildedRose.validate_quality(item)
     end
   self
   end
