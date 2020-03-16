@@ -15,31 +15,29 @@ class GildedRose
   end
 
   def self.validate_quality(item)
-    item.quality = 50 if item.quality > 50
-    item.quality = 0 if item.quality.negative?
+    item.quality = [50, item.quality].min
+    item.quality = [0, item.quality].max
   end
 
   def self.update_normal_item(item)
     item.sell_in -= 1
-    item.quality = if item.sell_in.negative?
-                     item.quality - 2
-                   else
-                     item.quality - 1
-                   end
+    item.quality = item.sell_in.negative? ? item.quality - 2 : item.quality - 1
   end
 
   def self.update_brie(item)
-    item.quality += 1
     item.sell_in -= 1
-    item.quality += 1 if item.sell_in.negative?
+    item.quality = item.sell_in.negative? ? item.quality + 2 : item.quality + 1
   end
 
   def self.update_backstage(item)
-    item.quality += 1
-    item.quality += 1 if item.sell_in < 11
-    item.quality += 1 if item.sell_in < 6
     item.sell_in -= 1
-    item.quality = 0 if item.sell_in < 0
+    # each element of breakpoints is an array whose first element is a
+    # breakpoint for sell_in, and whose second element is the update value for
+    # quality associated with that breakpoint. Elements should be in asending
+    # order by breakpoint.
+    breakpoints = [[0, -item.quality], [5, 3], [10, 2]]
+    breakpoint = breakpoints.find {|i| item.sell_in < i[0]}
+    item.quality = breakpoint ? item.quality + breakpoint[1] : item.quality + 1
   end
 
   def update_quality()
