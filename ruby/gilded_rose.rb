@@ -50,6 +50,7 @@ class GildedRose
         end
       end
     end
+  self
   end
 end
 
