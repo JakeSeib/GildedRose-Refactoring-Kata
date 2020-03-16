@@ -19,3 +19,7 @@ Test batteries for each should test:
 6. Quality never < 0
 7. Test battery for conjured items
 8. integrate conjured items into #5
+
+
+Notes
+- sell_in should not decrease for normal items after quality hits 0
