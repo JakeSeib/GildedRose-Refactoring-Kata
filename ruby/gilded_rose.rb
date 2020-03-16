@@ -15,8 +15,7 @@ class GildedRose
   end
 
   def self.validate_quality(item)
-    item.quality = [50, item.quality].min
-    item.quality = [0, item.quality].max
+    item.quality = [[50, item.quality].min, 0].max
   end
 
   def self.update_normal_item(item)
@@ -31,13 +30,17 @@ class GildedRose
 
   def self.update_backstage(item)
     item.sell_in -= 1
-    # each element of breakpoints is an array whose first element is a
-    # breakpoint for sell_in, and whose second element is the update value for
-    # quality associated with that breakpoint. Elements should be in asending
-    # order by breakpoint.
-    breakpoints = [[0, -item.quality], [5, 3], [10, 2]]
-    breakpoint = breakpoints.find {|i| item.sell_in < i[0]}
-    item.quality = breakpoint ? item.quality + breakpoint[1] : item.quality + 1
+    # each element of breakpoints is a hash whose 'break' attribute is a
+    # breakpoint for sell_in, and whose 'update' attribute is the update value
+    # for quality associated with that breakpoint. Elements should be in
+    # asending order by break.
+    breakpoints = [
+      {break: 0, update: -item.quality},
+      {break: 5, update: 3},
+      {break: 10, update: 2}
+    ]
+    breakpoint = breakpoints.find {|i| item.sell_in < i[:break]}
+    item.quality = breakpoint ? item.quality + breakpoint[:update] : item.quality + 1
   end
 
   def update_quality()
@@ -54,6 +57,7 @@ class GildedRose
       # ensure quality between 0 and 50
       GildedRose.validate_quality(item)
     end
+    # return self for method chaining
     self
   end
 end
