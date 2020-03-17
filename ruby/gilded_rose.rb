@@ -6,12 +6,13 @@ class GildedRose
 
   def self.special_item?(item)
     special_items = ["Aged Brie", "Backstage passes to a TAFKAL80ETC concert"]
-    special_items.include? item.name
+    (special_items.include? item.name) || item.name.start_with?("Conjured")
   end
 
   def self.update_special_item(item)
     GildedRose.update_backstage(item) if item.name == "Backstage passes to a TAFKAL80ETC concert"
     GildedRose.update_brie(item) if item.name == "Aged Brie"
+    GildedRose.update_conjured(item) if item.name.start_with?("Conjured")
   end
 
   def self.validate_quality(item)
@@ -43,9 +44,14 @@ class GildedRose
     item.quality = breakpoint ? item.quality + breakpoint[:update] : item.quality + 1
   end
 
+  def self.update_conjured(item)
+    item.sell_in -= 1
+    item.quality = item.sell_in.negative? ? item.quality - 4 : item.quality - 2
+  end
+
   def update_quality()
     @items.each do |item|
-      break if item.name == "Sulfuras, Hand of Ragnaros"
+      next if item.name == "Sulfuras, Hand of Ragnaros"
 
       if GildedRose.special_item?(item)
         # special items

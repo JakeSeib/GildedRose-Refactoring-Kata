@@ -9,7 +9,8 @@ describe GildedRose do
       Item.new("Boots of Speed", 30, 20),
       Item.new("Aged Brie", 30, 20),
       Item.new("Backstage passes to a TAFKAL80ETC concert", 30, 20),
-      Item.new("Sulfuras, Hand of Ragnaros", 30, 20)
+      Item.new("Sulfuras, Hand of Ragnaros", 30, 20),
+      Item.new("Conjured Sword", 30, 20)
     ]
   end
 
@@ -97,13 +98,36 @@ describe GildedRose do
       expect(items[1].quality).to eq(0)
     end
 
+    it "updates Conjured items" do
+      items = [
+        Item.new("Conjured Sword", 30, 20),
+        Item.new("Conjured Cloak", 0, 20)
+      ]
+      initial_items = items.map(&:clone)
+      days = 3
+      gilded_rose = GildedRose.new(items).update_quality()
+      expect(GildedRose.special_item?(items[0])).to eq(true)
+      expect(items[0].name.start_with?("Conjured")).to eq(true)
+      expect(items.map(&:sell_in)).to eq(initial_items.map { |item| item.sell_in - 1} )
+      expect(items[0].quality).to eq(initial_items[0].quality - 2)
+      expect(items[1].quality).to eq(initial_items[1].quality - 4)
+      (1..days).each do
+        gilded_rose.update_quality()
+      end
+      # update_quality has been called days + 1 times
+      expect(items.map(&:sell_in)).to eq(initial_items.map { |item| item.sell_in - (days + 1) })
+      expect(items[0].quality).to eq(initial_items[0].quality - 2*(days + 1))
+      expect(items[1].quality).to eq(initial_items[0].quality - 4*(days + 1))
+    end
+
     it "updates correctly at breakpoints" do
       items = [
         Item.new("Boots of Speed", 2, 20),
         Item.new("Aged Brie", 2, 20),
         Item.new("Backstage passes to a TAFKAL80ETC concert", 2, 20),
         Item.new("Backstage passes to a TAFKAL80ETC concert", 7, 20),
-        Item.new("Backstage passes to a TAFKAL80ETC concert", 12, 20)
+        Item.new("Backstage passes to a TAFKAL80ETC concert", 12, 20),
+        Item.new("Conjured Sword", 2, 20)
       ]
       initial_items = items.map(&:clone)
       days = 4
@@ -117,6 +141,7 @@ describe GildedRose do
       expect(items[2].quality).to eq(0)
       expect(items[3].quality).to eq(initial_items[3].quality + 10)
       expect(items[4].quality).to eq(initial_items[4].quality + 6)
+      expect(items[5].quality).to eq(initial_items[5].quality - 12)
     end
 
     it "updates quality of different types of items simultaneously" do
@@ -126,6 +151,7 @@ describe GildedRose do
       expect(items[1].quality).to eq(basic_item_list[1].quality + 1)
       expect(items[2].quality).to eq(basic_item_list[2].quality + 1)
       expect(items[3].quality).to eq(basic_item_list[3].quality)
+      expect(items[4].quality).to eq(basic_item_list[4].quality - 2)
     end
 
     it "doesn't set quality over 50" do
@@ -141,11 +167,12 @@ describe GildedRose do
         expect(item.quality).to eq(50)
       }
     end
-    
+
     it "doesn't set negative quality" do
       items = [
         Item.new("Boots of Speed", 30, 0),
-        Item.new("Dire Flail", -1, 1)
+        Item.new("Dire Flail", -1, 1),
+        Item.new("Conjured Sword", -4, 0)
       ]
       GildedRose.new(items).update_quality()
       items.each { |item|
